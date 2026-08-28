@@ -1,0 +1,28 @@
+# TTT2 Decipherer 2026 Version
+I am updating the damn mod!
+
+### TODO List
+- [✓] Switch color to be consistent with OG detective
+- [ ] Redo convars
+	- [✓] convar 1: how much charge does the mini tester need
+		- [ ] finish implementation
+	- [✓] convar 2: how much charge does the mini tester start with (percentage based)
+		- [ ] finish implementation
+	- [✓] convar 3: require mini tester to be equipped to charge?
+		- [ ] finish implementation
+	- [✓] convar 4: maximum number of uses for minitester
+		- [ ] finish implementation
+	- [✓] convar 5: destroy minitester when used on a traitor?
+		- [ ] finish implementation
+	- [✓] convar 6: deploy a smoke explosion when used on a traitor?
+		- [ ] finish implementation
+	- [✓] convar 7: show team instead of role when mini testing?
+		- [ ] finish implementation
+- [ ] new icon
+- [✓] better vmt settings
+- [ ] require mini tester to work similar to defib mod, continuous use on a player
+- [✓] remove legacy ULX stuff
+- [✓] remove status conditions (not needed for new plan)
+- [ ] add events to the EOR screen (Decipherer XYZ tested player XYZ and deciphered their role to be XYZ! +5 points)
+- [ ] more lang files
+- [ ] actually add a icon for the mini tester even though you probably never will see it
