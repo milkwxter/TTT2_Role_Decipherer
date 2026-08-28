@@ -10,13 +10,11 @@ I am updating the damn mod!
 		- [ ] finish implementation
 	- [✓] convar 3: require mini tester to be equipped to charge?
 		- [ ] finish implementation
-	- [✓] convar 4: maximum number of uses for minitester
+	- [✓] convar 4 and 5: enable max uses & then how many maximum number of uses for minitester
 		- [ ] finish implementation
-	- [✓] convar 5: destroy minitester when used on a traitor?
+	- [✓] convar 6: destroy minitester when used on a traitor?
 		- [ ] finish implementation
-	- [✓] convar 6: deploy a smoke explosion when used on a traitor?
-		- [ ] finish implementation
-	- [✓] convar 7: show team instead of role when mini testing?
+	- [✓] convar 7: deploy a smoke explosion when used on a traitor?
 		- [ ] finish implementation
 - [ ] new icon
 - [✓] better vmt settings
