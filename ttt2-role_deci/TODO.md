@@ -24,3 +24,4 @@ I am updating the damn mod!
 - [ ] add events to the EOR screen (Decipherer XYZ tested player XYZ and deciphered their role to be XYZ! +5 points)
 - [ ] more lang files
 - [ ] actually add a icon for the mini tester even though you probably never will see it
+- [ ] add FCVAR_REPLICATED flag to respective convars that the client wants for their HUD (probably max uses or charging stuff IDK)
