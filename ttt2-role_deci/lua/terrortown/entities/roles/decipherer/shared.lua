@@ -88,7 +88,7 @@ if CLIENT then
 			decimal = 0,
 		})
 		
-		form:MakeCheckBox({
+		local maxUseMaster = form:MakeCheckBox({
 			serverConvar = "ttt2_decipherer_max_uses_enabled",
 			label = "ttt2_label_decipherer_max_uses_enabled",
 			min = 0,
@@ -102,6 +102,7 @@ if CLIENT then
 			min = 1,
 			max = 10,
 			decimal = 0,
+			master = maxUseMaster,
 		})
 		
 		form:MakeCheckBox({
