@@ -18,3 +18,5 @@ L["ttt2_label_decipherer_max_uses"] = "Maximum number of uses"
 L["ttt2_label_decipherer_destroy_on_traitor"] = "Destroy minitester when it scans a traitor"
 L["ttt2_label_decipherer_discombob_on_traitor"] = "Spawn discombobulator explosion when it scans a traitor"
 L["ttt2_label_decipherer_smoke_on_traitor"] = "Spawn smoke explosion when it scans a traitor"
+
+L["ttt2_label_decipherer_hold_key_to_scan"] = "Hold [{key}] to scan player"
