@@ -20,3 +20,4 @@ L["ttt2_label_decipherer_discombob_on_traitor"] = "Spawn discombobulator explosi
 L["ttt2_label_decipherer_smoke_on_traitor"] = "Spawn smoke explosion when it scans a traitor"
 
 L["ttt2_label_decipherer_hold_key_to_scan"] = "Hold [{key}] to scan player"
+L["ttt2_label_decipherer_scan_progress"] = "Time left: {time}s"

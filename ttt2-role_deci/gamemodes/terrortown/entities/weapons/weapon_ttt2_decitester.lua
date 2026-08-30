@@ -80,7 +80,7 @@ if SERVER then
     end
 
     function SWEP:SetScanTime(time)
-        self:SetNWFloat("decitester_revive_time", time or 0)
+        self:SetNWFloat("decitester_scan_time", time or 0)
     end
 	
 	-- easy reset to beginning
@@ -210,7 +210,7 @@ if CLIENT then
 	
 	function SWEP:PrimaryAttack() end
 	
-	local colorDetectiveBlue = Color(75, 104, 169, 255)
+	local colorDetectiveBlue = Color(31, 77, 191, 255)
 	hook.Add("TTTRenderEntityInfo", "ttt2_decitester_display_info", function(tData)
         local ent = tData:GetEntity()
         local client = LocalPlayer()
@@ -232,7 +232,32 @@ if CLIENT then
             ),
             colorDetectiveBlue
         )
+		
+		if activeWeapon:GetState() ~= DECITESTER_BUSY then return end
+		
+		-- draw the progress bar
+		local progress = math.min((CurTime() - activeWeapon:GetStartTime()) / activeWeapon:GetScanTime(), 1.0)
+        local timeLeft = activeWeapon:GetScanTime() - (CurTime() - activeWeapon:GetStartTime())
 
-        tData:SetOutlineColor(colorDetectiveBlue)
+        local x = 0.5 * ScrW()
+        local y = 0.5 * ScrH()
+        local w, h = 0.2 * ScrW(), 0.025 * ScrH()
+		y = 0.95 * y
+		
+		surface.SetDrawColor(50, 50, 50, 220)
+        surface.DrawRect(x - 0.5 * w, y - h, w, h)
+        surface.SetDrawColor(clr(colorDetectiveBlue))
+        surface.DrawOutlinedRect(x - 0.5 * w, y - h, w, h)
+        surface.SetDrawColor(
+            clr(ColorAlpha(colorDetectiveBlue, (0.5 + 0.15 * math.sin(CurTime() * 4)) * 255))
+        )
+        surface.DrawRect(x - 0.5 * w + 2, y - h + 2, w * progress - 4, h - 4)
+
+        tData:AddDescriptionLine(
+            LANG.GetParamTranslation("ttt2_label_decipherer_scan_progress", { time = math.Round(timeLeft, 1) }),
+            colorDetectiveBlue
+        )
+		
+		tData:SetOutlineColor(colorDetectiveBlue)
     end)
 end

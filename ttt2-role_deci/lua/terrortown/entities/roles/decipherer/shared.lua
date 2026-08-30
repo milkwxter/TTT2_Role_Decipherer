@@ -13,7 +13,7 @@ if SERVER then
 end
 
 function ROLE:PreInitialize()
-	self.color = Color(75, 104, 169, 255)
+	self.color = Color(31, 77, 191, 255)
 
 	self.abbr = "deci"
 	self.score.killsMultiplier = 8
