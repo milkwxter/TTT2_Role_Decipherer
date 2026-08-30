@@ -19,8 +19,8 @@ if CLIENT then
 
 	SWEP.EquipMenuData = {
 		type = "item_weapon",
-		name = "WH-B3 Minitester",
-		desc = "deci_minitester_desc"
+		name = "WH-B3 Minitester TODO",
+		desc = "TODO"
 	}
 
 	SWEP.Icon = "vgui/ttt/icon_decitester"
