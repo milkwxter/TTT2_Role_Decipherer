@@ -12,6 +12,11 @@ local DECITESTER_ERROR_NO_USES = 2
 local DECITESTER_IDLE = 0
 local DECITESTER_BUSY = 1
 
+local DECITESTER_FIRE_DELAY = 0.8
+
+-- TODO: ADD MAX USES FUNCTIONALITY
+-- TODO: ADD ROLE SCAN FUNCTIONALITY
+
 if CLIENT then
 	SWEP.ViewModelFOV = 78
 	SWEP.DrawCrosshair = false
@@ -19,8 +24,8 @@ if CLIENT then
 
 	SWEP.EquipMenuData = {
 		type = "item_weapon",
-		name = "WH-B3 Minitester TODO",
-		desc = "TODO"
+		name = "ttt2_label_decipherer_minitester_name",
+		desc = "ttt2_label_decipherer_minitester_desc"
 	}
 
 	SWEP.Icon = "vgui/ttt/icon_decitester"
@@ -29,9 +34,9 @@ end
 local sounds = {
     empty = Sound("Weapon_SMG1.Empty"),
     beep = Sound("buttons/button17.wav"),
+	-- TODO: ADD ALARM SOUND
     hum = Sound("items/nvg_on.wav"),
     zap = Sound("ambient/energy/zap7.wav"),
-    scanned = Sound("items/smallmedkit1.wav"),
 }
 
 SWEP.Kind = WEAPON_EQUIP2
@@ -95,14 +100,14 @@ if SERVER then
 		if not IsValid(owner) then return end
 		
 		self:PlaySound("zap")
-		self:SetNextPrimaryFire(CurTime() + 0.5)
+		self:SetNextPrimaryFire(CurTime() + DECITESTER_FIRE_DELAY)
 		
 		if type == DECITESTER_ERROR_NOT_PLAYER then
-            LANG.Msg(owner, "TRANSLATE: not a player!", nil, MSG_MSTACK_WARN)
+            LANG.Msg(owner, "ttt2_label_decipherer_error_noplayer", nil, MSG_MSTACK_WARN)
 		elseif type == DECITESTER_ERROR_LOST_TARGET then
-			LANG.Msg(owner, "TRANSLATE: lost the target!", nil, MSG_MSTACK_WARN)
+			LANG.Msg(owner, "ttt2_label_decipherer_error_losttarget", nil, MSG_MSTACK_WARN)
 		elseif type == DECITESTER_ERROR_NO_USES then
-			LANG.Msg(owner, "TRANSLATE: no more uses!", nil, MSG_MSTACK_WARN)
+			LANG.Msg(owner, "ttt2_label_decipherer_error_nouses", nil, MSG_MSTACK_WARN)
 		end
 	end
 	
@@ -125,8 +130,9 @@ if SERVER then
 		if not IsValid(owner) then return end
 		
 		-- check how many uses are left
-		if self:GetMaxUses() <= 0 then
+		if GetConVar("ttt2_decipherer_max_uses_enabled"):GetBool() and self:GetMaxUses() <= 0 then
 			self:Message(DECITESTER_ERROR_NO_USES)
+			self:PlaySound("empty")
 			return
 		end
 		
@@ -166,12 +172,10 @@ if SERVER then
 		if CurTime() >= self:GetStartTime() + self.TimeToDecipherRole - 0.01 then
             target:Kill() -- TODO EPOP
 			self:SetState(DECITESTER_IDLE)
+			self:PlaySound("beep")
         elseif not IsValid(owner) or not IsValid(target)
 			or not owner:KeyDown(IN_ATTACK)
 			or not owner:GetEyeTrace(MASK_SHOT_HULL).Entity:IsPlayer() then
-			
-			print(owner)
-			print(target)
 			
 			-- time to reset
 			self:StopSound("hum")
@@ -232,6 +236,13 @@ if CLIENT then
             ),
             colorDetectiveBlue
         )
+		
+		if GetConVar("ttt2_decipherer_max_uses_enabled"):GetBool() then
+			tData:AddDescriptionLine(
+				LANG.GetParamTranslation("ttt2_label_decipherer_uses_left", {current = -1, maximum = activeWeapon:GetMaxUses() }),
+				colorDetectiveBlue
+			)
+		end
 		
 		if activeWeapon:GetState() ~= DECITESTER_BUSY then return end
 		

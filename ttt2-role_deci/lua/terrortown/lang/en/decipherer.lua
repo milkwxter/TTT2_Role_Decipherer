@@ -21,3 +21,11 @@ L["ttt2_label_decipherer_smoke_on_traitor"] = "Spawn smoke explosion when it sca
 
 L["ttt2_label_decipherer_hold_key_to_scan"] = "Hold [{key}] to scan player"
 L["ttt2_label_decipherer_scan_progress"] = "Time left: {time}s"
+L["ttt2_label_decipherer_uses_left"] = "Uses left: {current}/{maximum}"
+
+L["ttt2_label_decipherer_minitester_name"] = "WH-B3 Minitester"
+L["ttt2_label_decipherer_minitester_desc"] = "Use this to scan other terrorists to decipher their role."
+
+L["ttt2_label_decipherer_error_noplayer"] = "You are not scanning a player."
+L["ttt2_label_decipherer_error_losttarget"] = "You lost your target. Please try again."
+L["ttt2_label_decipherer_error_nouses"] = "You are out of Minitester uses."
