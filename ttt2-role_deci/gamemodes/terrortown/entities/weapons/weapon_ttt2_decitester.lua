@@ -71,7 +71,10 @@ if SERVER then
 	
 	-- make sure weapon values line up with convars
 	function SWEP:Initialize()
-		self:SetNWInt("decitester_max_uses", GetConVar("ttt2_decipherer_max_uses"):GetInt() or 0)
+		-- add the current values for decitester uses to be networked
+		local maxUses = GetConVar("ttt2_decipherer_max_uses"):GetInt()
+		self:SetNWInt("decitester_max_uses", maxUses or 0)
+		self:SetNWInt("decitester_cur_uses", maxUses or 0)
 		return
 	end
 	
@@ -87,6 +90,12 @@ if SERVER then
     function SWEP:SetScanTime(time)
         self:SetNWFloat("decitester_scan_time", time or 0)
     end
+
+    function SWEP:SubtractMinitesterUse()
+		local uses = self:GetNWInt("decitester_cur_uses" or 0)
+		uses = uses - 1
+        self:SetNWFloat("decitester_cur_uses", uses or 0)
+    end
 	
 	-- easy reset to beginning
 	function SWEP:Reset()
@@ -99,15 +108,17 @@ if SERVER then
 		local owner = self:GetOwner()
 		if not IsValid(owner) then return end
 		
-		self:PlaySound("zap")
 		self:SetNextPrimaryFire(CurTime() + DECITESTER_FIRE_DELAY)
 		
 		if type == DECITESTER_ERROR_NOT_PLAYER then
             LANG.Msg(owner, "ttt2_label_decipherer_error_noplayer", nil, MSG_MSTACK_WARN)
+			self:PlaySound("zap")
 		elseif type == DECITESTER_ERROR_LOST_TARGET then
 			LANG.Msg(owner, "ttt2_label_decipherer_error_losttarget", nil, MSG_MSTACK_WARN)
+			self:PlaySound("zap")
 		elseif type == DECITESTER_ERROR_NO_USES then
 			LANG.Msg(owner, "ttt2_label_decipherer_error_nouses", nil, MSG_MSTACK_WARN)
+			self:PlaySound("empty")
 		end
 	end
 	
@@ -130,9 +141,8 @@ if SERVER then
 		if not IsValid(owner) then return end
 		
 		-- check how many uses are left
-		if GetConVar("ttt2_decipherer_max_uses_enabled"):GetBool() and self:GetMaxUses() <= 0 then
+		if GetConVar("ttt2_decipherer_max_uses_enabled"):GetBool() and self:GetCurrentUses() <= 0 then
 			self:Message(DECITESTER_ERROR_NO_USES)
-			self:PlaySound("empty")
 			return
 		end
 		
@@ -154,6 +164,10 @@ if SERVER then
         self.decitestTarget = ent
 		
 		-- start the scan for think function
+		self:StartScanningPlayer(ent)
+	end
+	
+	function SWEP:StartScanningPlayer(ply)
 		self:SetState(DECITESTER_BUSY)
 		self:SetStartTime(CurTime())
         self:SetScanTime(self.TimeToDecipherRole)
@@ -170,9 +184,7 @@ if SERVER then
 		if not IsValid(target) then return end
 		
 		if CurTime() >= self:GetStartTime() + self.TimeToDecipherRole - 0.01 then
-            target:Kill() -- TODO EPOP
-			self:SetState(DECITESTER_IDLE)
-			self:PlaySound("beep")
+			self:ScanSuccess(target)
         elseif not IsValid(owner) or not IsValid(target)
 			or not owner:KeyDown(IN_ATTACK)
 			or not owner:GetEyeTrace(MASK_SHOT_HULL).Entity:IsPlayer() then
@@ -183,6 +195,13 @@ if SERVER then
             self:Message(DECITESTER_ERROR_LOST_TARGET)
         end
 	end
+	
+	function SWEP:ScanSuccess(ply)
+		ply:Kill() -- TODO EPOP
+		self:SetState(DECITESTER_IDLE)
+		self:PlaySound("beep")
+		self:SubtractMinitesterUse()
+	end
 end
 
 -- do not play sound when swep is empty
@@ -190,8 +209,13 @@ function SWEP:DryFire()
     return false
 end
 
+-- shared network variables so client can only read stuff
 function SWEP:GetState()
     return self:GetNWInt("decitester_state", DECITESTER_IDLE)
+end
+
+function SWEP:GetCurrentUses()
+    return self:GetNWInt("decitester_cur_uses", 0)
 end
 
 function SWEP:GetMaxUses()
@@ -208,7 +232,7 @@ end
 
 if CLIENT then
     function SWEP:Initialize()
-        self:AddTTT2HUDHelp("Hold to scan player")
+        self:AddTTT2HUDHelp("ttt2_label_decipherer_minitester_help")
         BaseClass.Initialize(self)
     end
 	
@@ -239,7 +263,7 @@ if CLIENT then
 		
 		if GetConVar("ttt2_decipherer_max_uses_enabled"):GetBool() then
 			tData:AddDescriptionLine(
-				LANG.GetParamTranslation("ttt2_label_decipherer_uses_left", {current = -1, maximum = activeWeapon:GetMaxUses() }),
+				LANG.GetParamTranslation("ttt2_label_decipherer_uses_left", {current = activeWeapon:GetCurrentUses(), maximum = activeWeapon:GetMaxUses() }),
 				colorDetectiveBlue
 			)
 		end
