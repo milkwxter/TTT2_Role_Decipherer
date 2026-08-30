@@ -8,13 +8,14 @@ SWEP.Base = "weapon_tttbase"
 local DECITESTER_ERROR_NOT_PLAYER = 0
 local DECITESTER_ERROR_LOST_TARGET = 1
 local DECITESTER_ERROR_NO_USES = 2
+local DECITESTER_ERROR_NOT_CHARGED = 3
+local DECITESTER_MSG_READY = 4
 
 local DECITESTER_IDLE = 0
 local DECITESTER_BUSY = 1
 
 local DECITESTER_FIRE_DELAY = 0.8
 
--- TODO: ADD MAX USES FUNCTIONALITY
 -- TODO: ADD ROLE SCAN FUNCTIONALITY
 
 if CLIENT then
@@ -34,9 +35,12 @@ end
 local sounds = {
     empty = Sound("Weapon_SMG1.Empty"),
     beep = Sound("buttons/button17.wav"),
-	-- TODO: ADD ALARM SOUND
     hum = Sound("items/nvg_on.wav"),
     zap = Sound("ambient/energy/zap7.wav"),
+    charge = Sound("ambient/energy/newspark07.wav"),
+    ready = Sound("buttons/button17.wav"),
+	testFine = Sound("buttons/combine_button5.wav"),
+	testEvil = Sound("buttons/button8.wav"),
 }
 
 SWEP.Kind = WEAPON_EQUIP2
@@ -53,10 +57,12 @@ SWEP.NoSights = true
 SWEP.HoldType = "slam"
 
 SWEP.Primary.Recoil = 0
-SWEP.Primary.ClipSize = 9999
-SWEP.Primary.DefaultClip = 1111
 SWEP.Primary.Automatic = false
 SWEP.Primary.Delay = 1
+
+SWEP.Primary.ClipMax = -1
+SWEP.Primary.ClipSize = GetConVar("ttt2_decipherer_max_charge"):GetInt()
+SWEP.Primary.DefaultClip = SWEP.Primary.ClipSize * (GetConVar("ttt2_decipherer_start_charge_pct"):GetInt() * 0.01)
 SWEP.Primary.Ammo = "none"
 
 SWEP.AllowDrop = false
@@ -69,12 +75,25 @@ if SERVER then
 		self:Remove()
 	end
 	
+	function SWEP:Deploy()
+		self.NextEffectTime = CurTime() + 1
+	end
+	
 	-- make sure weapon values line up with convars
 	function SWEP:Initialize()
 		-- add the current values for decitester uses to be networked
 		local maxUses = GetConVar("ttt2_decipherer_max_uses"):GetInt()
 		self:SetNWInt("decitester_max_uses", maxUses or 0)
 		self:SetNWInt("decitester_cur_uses", maxUses or 0)
+		
+		-- add charge values to get networked
+		local maxCharge = GetConVar("ttt2_decipherer_max_charge"):GetInt()
+		self:SetNWInt("decitester_max_charge", maxCharge)
+		self.Primary.ClipSize = maxCharge
+		
+		local currentCharge = maxCharge * (GetConVar("ttt2_decipherer_start_charge_pct"):GetInt() * 0.01)
+		self:SetNWInt("decitester_current_charge", currentCharge)
+		self.Primary.DefaultClip = currentCharge
 		return
 	end
 	
@@ -111,14 +130,20 @@ if SERVER then
 		self:SetNextPrimaryFire(CurTime() + DECITESTER_FIRE_DELAY)
 		
 		if type == DECITESTER_ERROR_NOT_PLAYER then
-            LANG.Msg(owner, "ttt2_label_decipherer_error_noplayer", nil, MSG_MSTACK_WARN)
+            LANG.Msg(owner, "ttt2_label_decipherer_error_no_player", nil, MSG_MSTACK_WARN)
 			self:PlaySound("zap")
 		elseif type == DECITESTER_ERROR_LOST_TARGET then
-			LANG.Msg(owner, "ttt2_label_decipherer_error_losttarget", nil, MSG_MSTACK_WARN)
+			LANG.Msg(owner, "ttt2_label_decipherer_error_lost_target", nil, MSG_MSTACK_WARN)
 			self:PlaySound("zap")
 		elseif type == DECITESTER_ERROR_NO_USES then
-			LANG.Msg(owner, "ttt2_label_decipherer_error_nouses", nil, MSG_MSTACK_WARN)
+			LANG.Msg(owner, "ttt2_label_decipherer_error_no_uses", nil, MSG_MSTACK_WARN)
 			self:PlaySound("empty")
+		elseif type == DECITESTER_ERROR_NOT_CHARGED then
+			LANG.Msg(owner, "ttt2_label_decipherer_error_not_charged", nil, MSG_MSTACK_WARN)
+			self:PlaySound("empty")
+		elseif type == DECITESTER_MSG_READY then
+			LANG.Msg(owner, "ttt2_label_decipherer_msg_ready", nil, MSG_MSTACK_ROLE)
+			self:PlaySound("ready")
 		end
 	end
 	
@@ -143,6 +168,12 @@ if SERVER then
 		-- check how many uses are left
 		if GetConVar("ttt2_decipherer_max_uses_enabled"):GetBool() and self:GetCurrentUses() <= 0 then
 			self:Message(DECITESTER_ERROR_NO_USES)
+			return
+		end
+		
+		-- check if charged
+		if self:Clip1() < self.Primary.ClipSize then
+			self:Message(DECITESTER_ERROR_NOT_CHARGED)
 			return
 		end
 		
@@ -175,10 +206,35 @@ if SERVER then
 	end
 	
 	function SWEP:Think()
-		if self:GetState() ~= DECITESTER_BUSY then return end
-		
 		local owner = self:GetOwner()
 		if not IsValid(owner) then return end
+		
+		-- if we are idle
+		if self:GetState() ~= DECITESTER_BUSY then
+			-- time gate charge logic
+			if (self.NextChargeTime or 0) > CurTime() then return end
+			self.NextChargeTime = CurTime() + 0.2
+			
+			-- if we are fully charged already
+			if self:Clip1() >= self.Primary.ClipSize then return end
+			
+			if (self.NextEffectTime or 0) <= CurTime() then
+				self.NextEffectTime = CurTime() + 1
+				
+				local ed = EffectData()
+				ed:SetOrigin(owner:GetPos())
+				util.Effect("decitester_charge_pulse", ed, true, true)
+			
+				self:PlaySound("charge")
+			end
+			
+			-- charge
+			self:SetClip1(self:Clip1() + 1)
+			if self:Clip1() >= self.Primary.ClipSize then
+				self:Message(DECITESTER_MSG_READY)
+			end
+			return
+		end
 		
 		local target = self.decitestTarget
 		if not IsValid(target) then return end
@@ -198,9 +254,19 @@ if SERVER then
 	
 	function SWEP:ScanSuccess(ply)
 		ply:Kill() -- TODO EPOP
+		
 		self:SetState(DECITESTER_IDLE)
-		self:PlaySound("beep")
-		self:SubtractMinitesterUse()
+		
+		self:PlaySound("beep") -- TODO CHANGE FOR ROLE
+		
+		-- subtract use if enabled
+		if GetConVar("ttt2_decipherer_max_uses_enabled"):GetBool() then
+			self:SubtractMinitesterUse()
+		end
+		
+		self:SetClip1(0)
+		
+		self.NextEffectTime = CurTime() + 1
 	end
 end
 

@@ -2,15 +2,17 @@ if SERVER then
 	AddCSLuaFile()
 	resource.AddFile("materials/vgui/ttt/dynamic/roles/icon_deci.vmt")
 	
-	CreateConVar("ttt2_decipherer_max_charge", 100, {FCVAR_ARCHIVE, FCVAR_NOTIFY}, "How much charge does the minitester need to work?", 10, 200)
-	CreateConVar("ttt2_decipherer_start_charge_pct", 50, {FCVAR_ARCHIVE, FCVAR_NOTIFY}, "Percent of charge the minitester starts with?", 0, 100)
-	CreateConVar("ttt2_decipherer_charge_while_unequipped", 0, {FCVAR_ARCHIVE, FCVAR_NOTIFY}, "Should the minitester charge while unequipped?", 0, 1)
+	-- server only convars
 	CreateConVar("ttt2_decipherer_max_uses_enabled", 0, {FCVAR_ARCHIVE, FCVAR_NOTIFY}, "Should the minitester have a limit to uses?", 0, 1)
 	CreateConVar("ttt2_decipherer_max_uses", 3, {FCVAR_ARCHIVE, FCVAR_NOTIFY}, "Max uses for minitester?", 1, 10)
 	CreateConVar("ttt2_decipherer_destroy_on_traitor", 1, {FCVAR_ARCHIVE, FCVAR_NOTIFY}, "Destroy minitester when finding a traitor?", 0, 1)
 	CreateConVar("ttt2_decipherer_discombob_on_traitor", 1, {FCVAR_ARCHIVE, FCVAR_NOTIFY}, "Discombobulate Decipherer when finding a traitor?", 0, 1)
 	CreateConVar("ttt2_decipherer_smoke_on_traitor", 0, {FCVAR_ARCHIVE, FCVAR_NOTIFY}, "Smoke bomb Decipherer when finding a traitor?", 0, 1)
 end
+
+-- shared convars, clients need to read these
+CreateConVar("ttt2_decipherer_max_charge", 100, {FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED}, "How much charge does the minitester need to work?", 10, 200)
+CreateConVar("ttt2_decipherer_start_charge_pct", 50, {FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED}, "Percent of charge the minitester starts with?", 0, 100)
 
 function ROLE:PreInitialize()
 	self.color = Color(31, 77, 191, 255)
@@ -77,14 +79,6 @@ if CLIENT then
 			label = "ttt2_label_decipherer_start_charge_pct",
 			min = 0,
 			max = 100,
-			decimal = 0,
-		})
-		
-		form:MakeCheckBox({
-			serverConvar = "ttt2_decipherer_charge_while_unequipped",
-			label = "ttt2_label_decipherer_charge_while_unequipped",
-			min = 0,
-			max = 1,
 			decimal = 0,
 		})
 		
