@@ -1,5 +1,8 @@
 if SERVER then
 	AddCSLuaFile()
+	
+	-- bum ass net messages
+	util.AddNetworkString("TTT2_Decipherer_EPOP")
 end
 
 DEFINE_BASECLASS("weapon_tttbase")
@@ -15,8 +18,6 @@ local DECITESTER_IDLE = 0
 local DECITESTER_BUSY = 1
 
 local DECITESTER_FIRE_DELAY = 0.8
-
--- TODO: ADD ROLE SCAN FUNCTIONALITY
 
 if CLIENT then
 	SWEP.ViewModelFOV = 78
@@ -209,6 +210,9 @@ if SERVER then
 		local owner = self:GetOwner()
 		if not IsValid(owner) then return end
 		
+		-- no uses left
+		if self:GetNWFloat("decitester_cur_uses") <= 0 then return end
+		
 		-- if we are idle
 		if self:GetState() ~= DECITESTER_BUSY then
 			-- time gate charge logic
@@ -253,11 +257,17 @@ if SERVER then
 	end
 	
 	function SWEP:ScanSuccess(ply)
-		ply:Kill() -- TODO EPOP
+		local owner = self:GetOwner()
+		if not IsValid(owner) then return end
+		
+		net.Start("TTT2_Decipherer_EPOP")
+			net.WriteString("ttt2_label_decipherer_epop")
+			net.WriteString(ply:GetRoleString())
+			net.WriteColor(ply:GetRoleColor(), false)
+			net.WritePlayer(ply)
+		net.Send(owner)
 		
 		self:SetState(DECITESTER_IDLE)
-		
-		self:PlaySound("beep") -- TODO CHANGE FOR ROLE
 		
 		-- subtract use if enabled
 		if GetConVar("ttt2_decipherer_max_uses_enabled"):GetBool() then
@@ -267,6 +277,59 @@ if SERVER then
 		self:SetClip1(0)
 		
 		self.NextEffectTime = CurTime() + 1
+		
+		-- on traitor effects
+		local plyTeam = ply:GetRealTeam()
+		if plyTeam ~= TEAM_TRAITOR then
+			self:PlaySound("testFine")
+			return
+		end
+		self:PlaySound("testEvil")
+		
+		-- discombob on traitor
+		if GetConVar("ttt2_decipherer_discombob_on_traitor"):GetBool() then
+			local dbombClass = "ttt_confgrenade_proj"
+			local dbomb = ents.Create(dbombClass)
+			if not IsValid(dbomb) then return end
+			
+			dbomb:SetPos(owner:GetPos())
+			dbomb:SetOwner(owner)
+			dbomb:SetThrower(owner)
+			dbomb:Spawn()
+			
+			local phys = dbomb:GetPhysicsObject()
+			
+			if IsValid(phys) then
+				phys:Wake()
+			end
+			
+			dbomb:SetDetonateExact(CurTime())
+		end
+		
+		-- smoke on traitor
+		if GetConVar("ttt2_decipherer_smoke_on_traitor"):GetBool() then
+			local smokeClass = "ttt_smokegrenade_proj"
+			local smoke = ents.Create(smokeClass)
+			if not IsValid(smoke) then return end
+			
+			smoke:SetPos(owner:GetPos())
+			smoke:SetOwner(owner)
+			smoke:SetThrower(owner)
+			smoke:Spawn()
+			
+			local phys = smoke:GetPhysicsObject()
+			
+			if IsValid(phys) then
+				phys:Wake()
+			end
+			
+			smoke:SetDetonateExact(CurTime())
+		end
+		
+		-- destroy on traitor
+		if GetConVar("ttt2_decipherer_destroy_on_traitor"):GetBool() then
+            self:Remove()
+		end
 	end
 end
 
@@ -361,4 +424,15 @@ if CLIENT then
 		
 		tData:SetOutlineColor(colorDetectiveBlue)
     end)
+	
+	net.Receive("TTT2_Decipherer_EPOP", function(len, ply)
+		local title = net.ReadString()
+		local role = net.ReadString()
+		local color = net.ReadColor(false)
+		local victim = net.ReadPlayer()
+		
+		local textString = LANG.GetParamTranslation(title, {player = victim:Nick(), role = role})
+		
+		EPOP:AddMessage({text = textString, color = color}, "ttt2_label_decipherer_epop_desc", displayTime, nil, true)
+	end)
 end

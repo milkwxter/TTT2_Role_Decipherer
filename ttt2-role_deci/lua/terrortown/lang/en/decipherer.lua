@@ -6,7 +6,7 @@ L["info_popup_" .. DECIPHERER.name] = [[You are the Decipherer! Scan other playe
 L["body_found_" .. DECIPHERER.abbr] = "They were a Decipherer."
 L["search_role_" .. DECIPHERER.abbr] = "This person was a Decipherer!"
 L["target_" .. DECIPHERER.name] = "Decipherer"
-L["ttt2_desc_" .. DECIPHERER.name] = [[The Decipherer can discover other player's roles using his WH-B3 Minitester.]]
+L["ttt2_desc_" .. DECIPHERER.name] = [[The Decipherer can discover other player's roles using his Minitester.]]
 L["credit_" .. DECIPHERER.abbr .. "_all"] = "Decipherer, you have been awarded {num} equipment credit(s) for your performance."
 
 -- CUSTOM ROLE LANGUAGE STRINGS
@@ -24,7 +24,7 @@ L["ttt2_label_decipherer_hold_key_to_scan"] = "Hold [{key}] to scan player"
 L["ttt2_label_decipherer_scan_progress"] = "Time left: {time}s"
 L["ttt2_label_decipherer_uses_left"] = "Uses left: {current}/{maximum}"
 
-L["ttt2_label_decipherer_minitester_name"] = "WH-B3 Minitester"
+L["ttt2_label_decipherer_minitester_name"] = "Minitester"
 L["ttt2_label_decipherer_minitester_desc"] = "Use this to scan other terrorists to decipher their role."
 
 L["ttt2_label_decipherer_error_no_player"] = "You are not scanning a player."
@@ -32,3 +32,6 @@ L["ttt2_label_decipherer_error_lost_target"] = "You lost your target. Please try
 L["ttt2_label_decipherer_error_no_uses"] = "You are out of Minitester uses."
 L["ttt2_label_decipherer_error_not_charged"] = "Your Minitester is not fully charged yet."
 L["ttt2_label_decipherer_msg_ready"] = "Your Minitester is fully charged!"
+
+L["ttt2_label_decipherer_epop"] = "{player} is a {role}!"
+L["ttt2_label_decipherer_epop_desc"] = "Only you can see this message."

@@ -17,9 +17,9 @@ I am updating the damn mod!
 		- [✓] finish implementation
 		
 	- [✓] convar 6: destroy minitester when used on a traitor?
-		- [ ] finish implementation
+		- [✓] finish implementation
 	- [✓] convar 7: deploy a smoke explosion when used on a traitor?
-		- [ ] finish implementation
+		- [✓] finish implementation
 - [ ] new icon
 - [✓] better vmt settings
 - [✓] require mini tester to work similar to defib mod, continuous use on a player
