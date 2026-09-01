@@ -1,6 +1,8 @@
 if SERVER then
 	AddCSLuaFile()
 	
+	resource.AddFile("materials/vgui/ttt/icon_decitester.vmt")
+	
 	-- bum ass net messages
 	util.AddNetworkString("TTT2_Decipherer_EPOP")
 end
@@ -35,7 +37,6 @@ end
 
 local sounds = {
     empty = Sound("Weapon_SMG1.Empty"),
-    beep = Sound("buttons/button17.wav"),
     hum = Sound("items/nvg_on.wav"),
     zap = Sound("ambient/energy/zap7.wav"),
     charge = Sound("ambient/energy/newspark07.wav"),
