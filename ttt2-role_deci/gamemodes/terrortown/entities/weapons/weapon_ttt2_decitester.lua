@@ -22,6 +22,9 @@ local DECITESTER_BUSY = 1
 local DECITESTER_FIRE_DELAY = 0.8
 
 if CLIENT then
+	SWEP.PrintName = "ttt2_label_decipherer_minitester_name"
+	SWEP.Slot = 8
+	
 	SWEP.ViewModelFOV = 78
 	SWEP.DrawCrosshair = false
 	SWEP.ViewModelFlip = false
@@ -45,7 +48,7 @@ local sounds = {
 	testEvil = Sound("buttons/button8.wav"),
 }
 
-SWEP.Kind = WEAPON_EQUIP2
+SWEP.Kind = WEAPON_ROLE
 SWEP.CanBuy = nil
 SWEP.notBuyable = true
 
@@ -278,6 +281,8 @@ if SERVER then
 		self:SetClip1(0)
 		
 		self.NextEffectTime = CurTime() + 1
+		
+		events.Trigger("deci_minitester", owner, ply)
 		
 		-- on traitor effects
 		local plyTeam = ply:GetRealTeam()

@@ -1,5 +1,5 @@
 if CLIENT then
-	EVENT.icon = "materials/vgui/ttt/dynamic/roles/icon_deci"
+	EVENT.icon = Material("vgui/ttt/vskin/events/deci_test")
 	EVENT.title = "ttt2_label_decipherer_event_title"
 	
 	function EVENT:GetText()
@@ -9,11 +9,12 @@ if CLIENT then
 				params = {
 					decipherer = self.event.decipherer,
 					deciphererSID = self.event.deciphererSID,
-					victim = self.event.decipherer,
+					victim = self.event.victim,
 					victimSID = self.event.victimSID,
-					role = self.event.role
-				}
-			}
+					role = roles.GetByIndex(self.event.role).name
+				},
+                translateParams = true,
+			},
 		}
 	end
 end
@@ -23,24 +24,15 @@ if SERVER then
 		self:AddAffectedPlayers({deciPly:SteamID64(), victimPly:SteamID64()}, {deciPly:Nick(), victimPly:Nick()})
 		
 		return self:Add({
-			decipherer = x,
-			deciphererSID = y,
-			victim = z,
-			victimSID = a,
-			role = b
+			decipherer = deciPly:Nick(),
+			deciphererSID = deciPly:SteamID64(),
+			victim = victimPly:Nick(),
+			victimSID = victimPly:SteamID64(),
+			role = victimPly:GetSubRole()
 		})
-	end
-	
-	function EVENT:CalculateScore()
-		local event = self.event
-		
-		if event.RoundState ~= ROUND_ACTIVE then return end
-		
-		-- add a bonus point for using the item
-		self:SetPlayerScore(deciphererSID, 1)
 	end
 end
 
 function EVENT:Serialize()
-	return self.event.decipherer .. " has learned that " .. self.event.victim .. " is a " .. self.event.role .. " using the Minitester."
+	return self.event.decipherer .. " has learned that " .. self.event.victim .. " is a " .. self.event.role .. " using a Minitester."
 end
